@@ -35,7 +35,7 @@ public class EmployeeController {
 		
 	}
 	@PostMapping("/save/all")
-	public ResponseStructure<List<Employee>> saveAll(@RequestBody List<Employee> list) {
+	public ResponseEntity<ResponseStructure<List<Employee>>> saveAll(@RequestBody List<Employee> list) {
 		return service.saveAll(list);
 		
 	}
@@ -87,37 +87,37 @@ public class EmployeeController {
 		return service.updateSalary(id, salary);
 	}
 	@PatchMapping("/update/designation")
-	public ResponseStructure<Employee> updateDesignation(int id,String designation) {
+	public ResponseEntity<ResponseStructure<Employee>> updateDesignation(int id,String designation) {
 		return service.updatedesignation(id, designation);
 	}
 	@PatchMapping("/update/phone")
-	public ResponseStructure<Employee> updatePhone(int id,long phone) {
+	public ResponseEntity<ResponseStructure<Employee>> updatePhone(int id,long phone) {
 		return service.updatePhone(id, phone);
 	}
 	@PatchMapping("/update/email")
-	public ResponseStructure<Employee> updateEmail(int id,String email) {
+	public ResponseEntity<ResponseStructure<Employee>> updateEmail(int id,String email) {
 		return service.updateemail(id, email);
 	}
 	@PatchMapping("/update/address")
-	public ResponseStructure<Employee> updateAddress(int id,String address) {
+	public ResponseEntity<ResponseStructure<Employee>> updateAddress(int id,String address) {
 		return service.updateAddress(id, address);
 	}
 	@GetMapping("/find/grade")
-	public ResponseStructure<List<Employee>> findByGrade(char grade) {
+	public ResponseEntity<ResponseStructure<List<Employee>>> findByGrade(char grade) {
 		return service.findByGrade(grade);
 	}
 	@GetMapping("/find/lessthan")
-	public ResponseStructure<List<Employee>> findByLessThan(double sal) {
+	public ResponseEntity<ResponseStructure<List<Employee>>> findByLessThan(double sal) {
 		return service.findByLessThan(sal);
 		
 	}
 	@GetMapping("/find/greaterthan")
-	public ResponseStructure<List<Employee>> findByGreaterThan(double sal) {
+	public ResponseEntity<ResponseStructure<List<Employee>>> findByGreaterThan(double sal) {
 		return service.findByGreaterThan(sal);
 		
 	}
 	@GetMapping("/find/between")
-	public ResponseStructure<List<Employee>> findBySalBetn(double sal1, double sal2) {
+	public ResponseEntity<ResponseStructure<List<Employee>>> findBySalBetn(double sal1, double sal2) {
 		return service.findBySalBetn(sal1, sal2);
 
 	}

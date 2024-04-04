@@ -10,6 +10,15 @@ import org.springframework.stereotype.Service;
 import com.qsp.employee_management_system.util.ResponseStructure;
 import com.qsp.employee_management_system.dao.EmployeeDao;
 import com.qsp.employee_management_system.dto.Employee;
+import com.qsp.employee_management_system.exception.AddressNotFound;
+import com.qsp.employee_management_system.exception.DesignationNotFound;
+import com.qsp.employee_management_system.exception.EmailNotFound;
+import com.qsp.employee_management_system.exception.EmployeeNotPresentException;
+import com.qsp.employee_management_system.exception.GradeNotFound;
+import com.qsp.employee_management_system.exception.IdNotFoundException;
+import com.qsp.employee_management_system.exception.NameNotFound;
+import com.qsp.employee_management_system.exception.PhoneNotFound;
+import com.qsp.employee_management_system.exception.SalaryNotFound;
 
 @Service
 public class EmployeeService {
@@ -65,9 +74,7 @@ public class EmployeeService {
 			return new ResponseEntity<ResponseStructure<Employee>>(structure, HttpStatus.OK);
 
 		} else {
-			structure.setMessage("Employee not found");
-			structure.setStatusCode(HttpStatus.NOT_FOUND.value());
-			return new ResponseEntity<ResponseStructure<Employee>>(structure, HttpStatus.NOT_FOUND);
+			throw new IdNotFoundException("Id not found");
 
 		}
 	}
@@ -93,19 +100,15 @@ public class EmployeeService {
 			structure.setStatusCode(HttpStatus.OK.value());
 			structure.setData(dao.saveEmployee(employee));
 
-			return new ResponseEntity<ResponseStructure<Employee>>(structure, HttpStatus.OK)
+			return new ResponseEntity<ResponseStructure<Employee>>(structure, HttpStatus.OK);
 
 		} else {
-			structure.setMessage("Employee not found");
-			structure.setStatusCode(HttpStatus.NOT_FOUND.value());
-			return new ResponseEntity<ResponseStructure<Employee>>(structure, HttpStatus.NOT_FOUND);
-
+			throw new IdNotFoundException("Id not found");
 		}
-
 
 	}
 
-	public ResponseStructure<List<Employee>> saveAll(List<Employee> list) {
+	public ResponseEntity<ResponseStructure<List<Employee>>> saveAll(List<Employee> list) {
 		for (Employee employee : list) {
 			double sal = employee.getEmployeeSalary();
 			if (sal <= 10000) {
@@ -128,7 +131,7 @@ public class EmployeeService {
 		structure.setStatusCode(HttpStatus.CREATED.value());
 		structure.setData(list);
 
-		return structure;
+		return new ResponseEntity<ResponseStructure<List<Employee>>>(structure, HttpStatus.NOT_FOUND);
 	}
 
 	public ResponseEntity<ResponseStructure<Employee>> find(int id) {
@@ -143,10 +146,7 @@ public class EmployeeService {
 			return new ResponseEntity<ResponseStructure<Employee>>(structure, HttpStatus.FOUND);
 		} else {
 
-			structure.setMessage("Id is not found");
-			structure.setStatusCode(HttpStatus.NOT_FOUND.value());
-
-			return new ResponseEntity<ResponseStructure<Employee>>(structure, HttpStatus.NOT_FOUND);
+			throw new IdNotFoundException("Id not found");
 		}
 
 	}
@@ -154,17 +154,14 @@ public class EmployeeService {
 	public ResponseEntity<ResponseStructure<List<Employee>>> findAll() {
 		List<Employee> list = dao.findAll();
 		ResponseStructure<List<Employee>> structure = new ResponseStructure<>();
-		if (list.isEmpty()) {
+		if (!list.isEmpty()) {
 
 			structure.setMessage("Find all Succesfull");
 			structure.setStatusCode(HttpStatus.FOUND.value());
 			structure.setData(list);
-			return new ResponseEntity<ResponseStructure<List<Employee>>>(structure, HttpStatus.OK);
+			return new ResponseEntity<ResponseStructure<List<Employee>>>(structure, HttpStatus.FOUND);
 		} else {
-			structure.setMessage("Employee Not is not found");
-			structure.setStatusCode(HttpStatus.NOT_FOUND.value());
-
-			return new ResponseEntity<ResponseStructure<List<Employee>>>(structure, HttpStatus.NOT_FOUND);
+			throw new EmployeeNotPresentException("Employee is not present");
 		}
 
 	}
@@ -175,11 +172,11 @@ public class EmployeeService {
 			if (employee.getEmployeePassword().equals(password)) {
 				return "Login successfull";
 			} else {
-				return "Wrong password";
+				return "password not Found";
 			}
 
 		} else {
-			return "Employee is not register";
+			throw new EmailNotFound("Email Not found");
 		}
 
 	}
@@ -197,10 +194,7 @@ public class EmployeeService {
 
 		} else {
 
-			structure.setMessage("Employee Not is not found");
-			structure.setStatusCode(HttpStatus.NOT_FOUND.value());
-
-			return new ResponseEntity<ResponseStructure<Employee>>(structure, HttpStatus.NOT_FOUND);
+			throw new PhoneNotFound("Phone Not found");
 		}
 
 	}
@@ -215,80 +209,57 @@ public class EmployeeService {
 			structure.setData(dao.findByEmail(email));
 
 			return new ResponseEntity<ResponseStructure<Employee>>(structure, HttpStatus.FOUND);
-			
 
 		} else {
 
-			structure.setMessage("Employee Not is not found");
-			structure.setStatusCode(HttpStatus.NOT_FOUND.value());
-
-			return new ResponseEntity<ResponseStructure<Employee>>(structure, HttpStatus.NOT_FOUND);
+			throw new EmailNotFound("email not Found");
 
 		}
 
 	}
 
 	public ResponseEntity<ResponseStructure<List<Employee>>> findByName(String name) {
-   List<Employee> list=dao.findByName(name);
-   ResponseStructure<List<Employee>> structure = new ResponseStructure<>();
-   if (!list.isEmpty()) {
-	   structure.setMessage("Find Succesfull");
-		structure.setStatusCode(HttpStatus.OK.value());
-		structure.setData(dao.findByName(name));
-		return new ResponseEntity<ResponseStructure<List<Employee>>>(structure, HttpStatus.OK);
-} else {
-	
-	structure.setMessage("Employee Not is not found");
-	structure.setStatusCode(HttpStatus.NOT_FOUND.value());
+		List<Employee> list = dao.findByName(name);
+		ResponseStructure<List<Employee>> structure = new ResponseStructure<>();
+		if (!list.isEmpty()) {
+			structure.setMessage("Find Succesfull");
+			structure.setStatusCode(HttpStatus.OK.value());
+			structure.setData(dao.findByName(name));
+			return new ResponseEntity<ResponseStructure<List<Employee>>>(structure, HttpStatus.OK);
+		} else {
 
-	return new ResponseEntity<ResponseStructure<List<Employee>>>(structure, HttpStatus.NOT_FOUND);
-}
-		
-		
-
-		
+			throw new NameNotFound("Name not Found");
+		}
 
 	}
 
 	public ResponseEntity<ResponseStructure<List<Employee>>> findByAddress(String address) {
-		List<Employee> list=dao.findByAddress(address);
+		List<Employee> list = dao.findByAddress(address);
 		ResponseStructure<List<Employee>> structure = new ResponseStructure<>();
-		 if (!list.isEmpty()) {
-			 structure.setMessage("Find Succesfull");
-				structure.setStatusCode(HttpStatus.FOUND.value());
-				structure.setData(dao.findByAddress(address));
-				return new ResponseEntity<ResponseStructure<List<Employee>>>(structure, HttpStatus.OK);
-		 } else {
-		 	
-		 	structure.setMessage("Employee Not is not found");
-		 	structure.setStatusCode(HttpStatus.NOT_FOUND.value());
+		if (!list.isEmpty()) {
+			structure.setMessage("Find Succesfull");
+			structure.setStatusCode(HttpStatus.FOUND.value());
+			structure.setData(dao.findByAddress(address));
+			return new ResponseEntity<ResponseStructure<List<Employee>>>(structure, HttpStatus.OK);
+		} else {
 
-		 	return new ResponseEntity<ResponseStructure<List<Employee>>>(structure, HttpStatus.NOT_FOUND);
-		 }
-		
-		
-
-		
+			throw new AddressNotFound("Address not Found");
+		}
 
 	}
 
 	public ResponseEntity<ResponseStructure<List<Employee>>> findByDesignation(String designation) {
-		List<Employee> list=dao.findByDesignation(designation);
+		List<Employee> list = dao.findByDesignation(designation);
 		ResponseStructure<List<Employee>> structure = new ResponseStructure<>();
-		 if (!list.isEmpty()) {
-			 structure.setMessage("Find Succesfull");
-				structure.setStatusCode(HttpStatus.FOUND.value());
-				structure.setData(dao.findByDesignation(designation));
-				return new ResponseEntity<ResponseStructure<List<Employee>>>(structure, HttpStatus.OK);
-		 } else {
-		 	
-		 	structure.setMessage("Employee Not is not found");
-		 	structure.setStatusCode(HttpStatus.NOT_FOUND.value());
+		if (!list.isEmpty()) {
+			structure.setMessage("Find Succesfull");
+			structure.setStatusCode(HttpStatus.FOUND.value());
+			structure.setData(dao.findByDesignation(designation));
+			return new ResponseEntity<ResponseStructure<List<Employee>>>(structure, HttpStatus.OK);
+		} else {
 
-		 	return new ResponseEntity<ResponseStructure<List<Employee>>>(structure, HttpStatus.NOT_FOUND);
-		 }
-		
-		
+			throw new DesignationNotFound("Designation Not Found");
+		}
 
 	}
 
@@ -296,7 +267,7 @@ public class EmployeeService {
 		Employee employee = dao.getEmployee(id);
 		ResponseStructure<Employee> structure = new ResponseStructure<>();
 		if (employee != null) {
-			
+
 			structure.setMessage("Delete Succesfull");
 			structure.setStatusCode(HttpStatus.OK.value());
 			structure.setData(dao.delete(id));
@@ -304,11 +275,8 @@ public class EmployeeService {
 			return new ResponseEntity<ResponseStructure<Employee>>(structure, HttpStatus.OK);
 
 		} else {
-			structure.setMessage("Employee Not is not found");
-			structure.setStatusCode(HttpStatus.NOT_FOUND.value());
+			throw new IdNotFoundException("Id Not found");
 
-			return new ResponseEntity<ResponseStructure<Employee>>(structure, HttpStatus.NOT_FOUND);
-			
 		}
 
 	}
@@ -317,7 +285,7 @@ public class EmployeeService {
 		Employee employee = dao.findByPhone(phone);
 		ResponseStructure<Employee> structure = new ResponseStructure<>();
 		if (employee != null) {
-			
+
 			structure.setMessage("Delete Succesfull");
 			structure.setStatusCode(HttpStatus.OK.value());
 			structure.setData(dao.delete(employee.getEmployeeId()));
@@ -326,10 +294,7 @@ public class EmployeeService {
 
 		} else {
 
-			structure.setMessage("Employee Not is not found");
-			structure.setStatusCode(HttpStatus.NOT_FOUND.value());
-
-			return new ResponseEntity<ResponseStructure<Employee>>(structure, HttpStatus.NOT_FOUND);
+			throw new PhoneNotFound("Phone Not found");
 		}
 
 	}
@@ -338,7 +303,7 @@ public class EmployeeService {
 		Employee employee = dao.findByEmail(email);
 		ResponseStructure<Employee> structure = new ResponseStructure<>();
 		if (employee != null) {
-			
+
 			structure.setMessage("Delete Succesfull");
 			structure.setStatusCode(HttpStatus.OK.value());
 			structure.setData(dao.delete(employee.getEmployeeId()));
@@ -346,15 +311,12 @@ public class EmployeeService {
 			return new ResponseEntity<ResponseStructure<Employee>>(structure, HttpStatus.OK);
 		} else {
 
-			structure.setMessage("Employee Not is not found");
-			structure.setStatusCode(HttpStatus.NOT_FOUND.value());
-
-			return new ResponseEntity<ResponseStructure<Employee>>(structure, HttpStatus.NOT_FOUND);
+			throw new EmailNotFound("email not Found");			
 		}
 
 	}
 
-	public ResponseStructure<Employee> updatePhone(int id, long phone) {
+	public ResponseEntity<ResponseStructure<Employee>> updatePhone(int id, long phone) {
 		Employee employee = dao.getEmployee(id);
 		if (employee != null) {
 
@@ -364,15 +326,15 @@ public class EmployeeService {
 			structure.setStatusCode(HttpStatus.OK.value());
 			structure.setData(dao.saveEmployee(employee));
 
-			return structure;
+			return new ResponseEntity<ResponseStructure<Employee>>(structure, HttpStatus.OK);
 
 		} else {
-			return null;
+			throw new IdNotFoundException("Id Not found");
 		}
 
 	}
 
-	public ResponseStructure<Employee> updateemail(int id, String email) {
+	public ResponseEntity<ResponseStructure<Employee>> updateemail(int id, String email) {
 		Employee employee = dao.getEmployee(id);
 		if (employee != null) {
 			employee.setEmployeeEmail(email);
@@ -381,15 +343,17 @@ public class EmployeeService {
 			structure.setStatusCode(HttpStatus.OK.value());
 			structure.setData(dao.saveEmployee(employee));
 
-			return structure;
+			return new ResponseEntity<ResponseStructure<Employee>>(structure, HttpStatus.OK);
 
 		} else {
-			return null;
+			throw new IdNotFoundException("Id Not found");
 		}
+
+		
 
 	}
 
-	public ResponseStructure<Employee> updateAddress(int id, String address) {
+	public ResponseEntity<ResponseStructure<Employee>> updateAddress(int id, String address) {
 		Employee employee = dao.getEmployee(id);
 		if (employee != null) {
 			employee.setEmployeeAddress(address);
@@ -398,15 +362,16 @@ public class EmployeeService {
 			structure.setStatusCode(HttpStatus.OK.value());
 			structure.setData(dao.saveEmployee(employee));
 
-			return structure;
+			return new ResponseEntity<ResponseStructure<Employee>>(structure, HttpStatus.OK);
 
 		} else {
-			return null;
+			throw new IdNotFoundException("Id Not found");
 		}
+
 
 	}
 
-	public ResponseStructure<Employee> updatedesignation(int id, String designation) {
+	public ResponseEntity<ResponseStructure<Employee>> updatedesignation(int id, String designation) {
 		Employee employee = dao.getEmployee(id);
 		if (employee != null) {
 			employee.setEmployeeDesignation(designation);
@@ -415,51 +380,77 @@ public class EmployeeService {
 			structure.setStatusCode(HttpStatus.OK.value());
 			structure.setData(dao.saveEmployee(employee));
 
-			return structure;
+			return new ResponseEntity<ResponseStructure<Employee>>(structure, HttpStatus.OK);
 
 		} else {
-			return null;
+			throw new IdNotFoundException("Id Not found");
+		}
+
+
+	}
+
+	public ResponseEntity<ResponseStructure<List<Employee>>> findByGrade(char grade) {
+		List<Employee> list=dao.findByGrade(grade);
+		ResponseStructure<List<Employee>> structure = new ResponseStructure<>();
+		if (!list.isEmpty()) {
+			structure.setMessage("Find Succesfull");
+			structure.setStatusCode(HttpStatus.FOUND.value());
+			structure.setData(dao.findByGrade(grade));
+
+			return new ResponseEntity<ResponseStructure<List<Employee>>>(structure, HttpStatus.OK);
+			
+		} else {
+             throw new GradeNotFound("Grade Not Found");
+		}
+		
+		
+
+	}
+
+	public ResponseEntity<ResponseStructure<List<Employee>>> findByLessThan(double sal) {
+		List<Employee> list=dao.findByLessThan(sal);
+		ResponseStructure<List<Employee>> structure = new ResponseStructure<>();
+		if (!list.isEmpty()) {
+		structure.setMessage("Find Succesfull");
+		structure.setStatusCode(HttpStatus.OK.value());
+		structure.setData(dao.findByLessThan(sal));
+		return new ResponseEntity<ResponseStructure<List<Employee>>>(structure, HttpStatus.OK);
+		
+		} else {
+			throw new SalaryNotFound("salary Not Found");
 		}
 
 	}
 
-	public ResponseStructure<List<Employee>> findByGrade(char grade) {
+	public ResponseEntity<ResponseStructure<List<Employee>>> findByGreaterThan(double sal) {
+		List<Employee> list=dao.findByGreaterThan(sal);
 		ResponseStructure<List<Employee>> structure = new ResponseStructure<>();
-		structure.setMessage("Find Succesfull");
-		structure.setStatusCode(HttpStatus.OK.value());
-		structure.setData(dao.findByGrade(grade));
-
-		return structure;
-
-	}
-
-	public ResponseStructure<List<Employee>> findByLessThan(double sal) {
-		ResponseStructure<List<Employee>> structure = new ResponseStructure<>();
-		structure.setMessage("Find Succesfull");
-		structure.setStatusCode(HttpStatus.OK.value());
-		structure.setData(dao.findByLessThan(sal));
-
-		return structure;
-
-	}
-
-	public ResponseStructure<List<Employee>> findByGreaterThan(double sal) {
-		ResponseStructure<List<Employee>> structure = new ResponseStructure<>();
+		if (!list.isEmpty()) {
 		structure.setMessage("Find Succesfull");
 		structure.setStatusCode(HttpStatus.OK.value());
 		structure.setData(dao.findByGreaterThan(sal));
-
-		return structure;
+		return new ResponseEntity<ResponseStructure<List<Employee>>>(structure, HttpStatus.OK);
+		
+		} else {
+			throw new SalaryNotFound("salary Not Found");
+		}
 
 	}
 
-	public ResponseStructure<List<Employee>> findBySalBetn(double sal1, double sal2) {
+	public ResponseEntity<ResponseStructure<List<Employee>>> findBySalBetn(double sal1, double sal2) {
+		List<Employee> list=dao.findBySalBetn(sal1, sal2);
 		ResponseStructure<List<Employee>> structure = new ResponseStructure<>();
+		if (!list.isEmpty()) {
 		structure.setMessage("Find Succesfull");
 		structure.setStatusCode(HttpStatus.OK.value());
 		structure.setData(dao.findBySalBetn(sal1, sal2));
+		return new ResponseEntity<ResponseStructure<List<Employee>>>(structure, HttpStatus.OK);
+		
+		} else {
+			throw new SalaryNotFound("salary Not Found");
+		}
 
-		return structure;
+		
 
 	}
 

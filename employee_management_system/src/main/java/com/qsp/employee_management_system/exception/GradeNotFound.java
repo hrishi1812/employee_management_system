@@ -3,14 +3,16 @@ package com.qsp.employee_management_system.exception;
 import lombok.Data;
 
 @Data
-public class IdNotFoundException extends RuntimeException {
+public class GradeNotFound extends RuntimeException{
 	private String message;
-	 public IdNotFoundException(String message) {
-		
+	public GradeNotFound(String message) {
 		this.message=message;
 	}
-	 @Override
+   @Override
    public String getMessage() {
-	   return message;
+	return message;
+	   
    }
+	
+
 }
